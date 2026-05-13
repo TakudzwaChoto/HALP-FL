@@ -124,7 +124,7 @@ The framework automatically executes seven comprehensive experiments:
 | `collusion_resistance.png` | Attack success rates over malicious clients | Adversarial robustness |
 | `gradient_leakage.png` | Image reconstruction comparisons (2×4 grid) | Privacy guarantee visualization |
 | `ablation_study.png` | Component accuracy & efficiency | Contribution analysis |
-| `tables.txt` | LaTeX-formatted tables | Direct paper integration |
+
 
 ### Result Files
 
