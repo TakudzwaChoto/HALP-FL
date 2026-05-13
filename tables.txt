@@ -1,0 +1,134 @@
+% ===========================================
+% TABLE 1: Network Structures
+% ===========================================
+
+\begin{table*}[t]
+\centering
+\caption{Comparison of MNIST-CNN and CIFAR-CNN structures and parameters}
+\label{tab:network_structures}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Dataset & Network & Convolutional Layer Details & Pooling Layers & Fully Connected Layers \\
+\midrule
+MNIST \& FashionMNIST & MNIST-CNN & 3 layers: 1->32->64 channels (3x3 kernel, ReLU) & 2 layers (2x2 max pooling) & 2 layers: 64->10 neurons (ReLU + Softmax) \\
+CIFAR-10 & CIFAR-CNN & 4 layers: 3->32->64->128 channels (3x3 kernel, ReLU) & 2 layers (2x2 max pooling) & 2 layers: 128->10 neurons (ReLU + Softmax) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% ===========================================
+% TABLE 2: Parameter Settings
+% ===========================================
+
+\begin{table*}[t]
+\centering
+\caption{Parameter settings}
+\label{tab:parameters}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Parameters & MNIST & FashionMNIST & CIFAR-10 \\
+\midrule
+Learning rate ($r$) & 0.001 & 0.001 & 0.001 \\
+Number of clients ($N$) & 5 & 5 & 5 \\
+Local epochs ($m$) & 10 & 20 & 20 \\
+Key length ($\lambda$) bits & 256,512,1024 & 512 & 512 \\
+Training rounds ($T$) & 30 & 30 & 30 \\
+Privacy budget ($\varepsilon$) & 1,2,3 & 1,2,3 & 1,2,3 \\
+Adjustment factor ($a$) & 0.8 & 0.8 & 0.8 \\
+Failure probability ($\delta$) & $10^{-5}$ & $10^{-5}$ & $10^{-5}$ \\
+Threshold parameter ($t$) & $\lfloor N/2\rfloor + 1 = 3$ & 3 & 3 \\
+Batch size & 64 & 64 & 64 \\
+Optimizer & SGD & SGD & SGD \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% ===========================================
+% TABLE 3: Encryption/Decryption Times
+% ===========================================
+
+\begin{table*}[t]
+\centering
+\caption{Encryption and decryption time comparison under different key lengths (unit: seconds)}
+\label{tab:encryption_times}
+\begin{tabular}{@{}cccccccccc@{}}
+\toprule
+\multirow{2}{*}{$\lambda$} & \multicolumn{2}{c}{FedAvg+HE} & \multicolumn{2}{c}{FedPro+HE} & \multicolumn{2}{c}{ADPHE-FL} & \multicolumn{2}{c}{HALP-FL} & \multirow{2}{*}{Improvement} \\
+\cline{2-9}
+ & Enc & Dec & Enc & Dec & Enc & Dec & Enc & Dec & \\
+\midrule
+256 & 111 & 55 & 93 & 31 & 60 & 45 & \textbf{45} & \textbf{35} & 59.5% / 36.4% \\
+512 & 235 & 114 & 114 & 91 & 57 & 102 & \textbf{43} & \textbf{78} & 81.7% / 31.6% \\
+1024 & 2056 & 592 & 2022 & 658 & 889 & 104 & \textbf{765} & \textbf{92} & 62.8% / 84.5% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% ===========================================
+% TABLE 4: Accuracy Comparison
+% ===========================================
+
+\begin{table*}[t]
+\centering
+\caption{Test accuracy comparison at convergence (\%). For DP-based methods, $\varepsilon=1$; for FedAvg, no DP applied.}
+\label{tab:accuracy_summary}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Method & MNIST & FashionMNIST & CIFAR-10 \\
+\midrule
+FedAvg (no privacy) & 99.2 & 93.5 & 78.0 \\
+HALP-FL (ours) & \textbf{99.8} & \textbf{93.0} & \textbf{75.4} \\
+ADPHE-FL & 97.9 & 91.2 & 73.9 \\
+DPSHE & 95.5 & 87.2 & 72.8 \\
+SPP-FLHE & 95.2 & 86.8 & 72.9 \\
+PriSec-FedGuardNet & 94.8 & 86.0 & 71.2 \\
+CLFLDP ($\varepsilon=3$) & 96.9 & 90.2 & 73.1 \\
+DP-FL ($\varepsilon=3$) & 84.9 & 79.1 & 64.1 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% ===========================================
+% TABLE 5: Ablation Study
+% ===========================================
+
+\begin{table*}[t]
+\centering
+\caption{Ablation study: contribution of HALP-FL components on CIFAR-10 ($\varepsilon=1$)}
+\label{tab:ablation}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Configuration & Accuracy (\%) & $\Delta$ from full & Encryption Time (s) \\
+\midrule
+Full HALP-FL & 75.2 & — & 765 \\
+w/o client-specific factors & 74.0 & -1.2 & 765 \\
+w/o threshold HE & 75.1 & -0.1 & 752 \\
+w/o verification layer & 75.2 & 0.0 & 765 \\
+w/o sparsification & 75.3 & +0.1 & 889 \\
+ADPHE-FL baseline & 74.0 & -1.2 & 889 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% ===========================================
+% TABLE 6: State-of-the-Art Comparison
+% ===========================================
+
+\begin{table*}[t]
+\centering
+\caption{Comparison with state-of-the-art FL methods}
+\label{tab:comparison}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Method & Client Adapt. & Collusion Res. & Risk-Based & Efficiency & Accuracy \\
+\midrule
+DP-FL & No & No & No & Fast & 56.0\% \\
+CLFLDP & Round only & No & No & Medium & 72.0\% \\
+ADPHE-FL & Round only & No & No & Fast & 74.0\% \\
+DPSHE & No & Yes & No & Slow & 72.8\% \\
+SPP-FLHE & Global DP & No & No & Medium & 72.9\% \\
+PriSec-FedGuardNet & No & Partial & No & Slow & 71.2\% \\
+\textbf{HALP-FL} & \textbf{Per-client} & \textbf{Yes} & \textbf{Yes} & \textbf{Fast} & \textbf{75.2\%} \\
+\bottomrule
+\end{tabular}
+\end{table*}
