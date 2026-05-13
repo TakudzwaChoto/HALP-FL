@@ -1,4 +1,4 @@
-# HALP-FL: Hybrid Adaptive Layered Privacy Framework for Federated Learning
+# HALP-FL: Provably Optimal Privacy Allocation for Secure Federated Learning
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Custom-green.svg)](#license)
