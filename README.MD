@@ -253,14 +253,7 @@ matplotlib.use('Agg')  # Add at the beginning of halp_fl.py
 ---
 
 ## Contact & Support
-
-**Corresponding Authors:**
 - Takudzwa Choto (ctakudzwa95@gmail.com)
-- William Banda (adsonwilliambanda@gmail.com)
-
-**Report Issues:** [GitHub Issues](https://github.com/TakudzwaChoto/HALP-FL/issues)
-
----
 
 ## License
 
