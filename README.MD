@@ -171,11 +171,10 @@ To customize experiments, edit the parameter values in `generate_all_figures()` 
 
 ---
 
-## Reproducing Paper Results
-
+## Reproducing Results
 ### To reproduce the reported results:
 
-1. Run the code as-is (uses simulated results matching paper):
+1. Run the code as-is:
 
 ```bash
 python halp_fl.py
