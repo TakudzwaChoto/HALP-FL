@@ -14,7 +14,7 @@ HALP-FL is a comprehensive implementation of a hybrid federated learning framewo
 - **Homomorphic Encryption Integration**: Threshold encryption for secure parameter aggregation
 - **Comprehensive Benchmarking**: Seven experimental scenarios including accuracy, privacy-utility tradeoffs, and adversarial robustness
 - **Production-Ready Code**: Fully documented with support for multiple datasets (MNIST, FashionMNIST, CIFAR-10)
-- **Reproducible Research**: Automated experiment generation with publication-ready visualizations
+
 
 ---
 
@@ -23,8 +23,8 @@ HALP-FL is a comprehensive implementation of a hybrid federated learning framewo
 ### Prerequisites
 
 - **Python 3.8** or higher
-- **GPU with CUDA support** (optional but recommended for performance)
-- **16GB+ RAM** (recommended for full experiments)
+- **GPU with CUDA support** (recommended for performance)
+- **32GB+ RAM** (recommended for full experiments)
 
 ### Installation
 
