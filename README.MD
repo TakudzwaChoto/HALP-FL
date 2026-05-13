@@ -262,11 +262,9 @@ This code is provided for research and reproducibility purposes. Please contact 
 ---
 
 ## Reproducibility Checklist
-
 - ✅ Complete source code provided
 - ✅ Dependencies explicitly listed in `requirements.txt`
-- ✅ Automated dataset download included
-- ✅ Comprehensive documentation
+- ✅ Dataset download included
 - Set `torch.manual_seed(42)` for bit-exact reproducibility
 
 ---
