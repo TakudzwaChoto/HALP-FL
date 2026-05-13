@@ -1,30 +1,61 @@
-HALP-FL: Complete Framework Implementation
+# HALP-FL: Hybrid Adaptive Layered Privacy Framework for Federated Learning
 
-Overview
-This repository contains the complete implementation of HALP-FL (Hybrid Adaptive Layered Privacy Framework for Federated Learning) as described in the paper. The framework integrates client-specific adaptive differential privacy (DP), threshold homomorphic encryption (HE), and risk-activated zero-knowledge verification (ZKP).
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-Custom-green.svg)](#license)
+[![Paper](https://img.shields.io/badge/paper-Peer--to--Peer%20Networking-blue)](https://link.springer.com/journal/12083)
 
-Quick Start
-Prerequisites
-Python 3.8 or higher
+## Overview
 
-CUDA-capable GPU (optional but recommended)
+HALP-FL is a comprehensive implementation of a hybrid federated learning framework that integrates **client-specific differential privacy** with **threshold homomorphic encryption** to provide provably optimal privacy allocation in distributed machine learning environments. This framework addresses the challenge of balancing privacy-utility tradeoffs while maintaining computational efficiency in federated settings.
 
-16GB+ RAM recommended
+### Key Features
 
-Installation
-bash
+- **Adaptive Privacy Allocation**: Client-specific differential privacy budgets based on data sensitivity and progress
+- **Homomorphic Encryption Integration**: Threshold encryption for secure parameter aggregation
+- **Comprehensive Benchmarking**: Seven experimental scenarios including accuracy, privacy-utility tradeoffs, and adversarial robustness
+- **Production-Ready Code**: Fully documented with support for multiple datasets (MNIST, FashionMNIST, CIFAR-10)
+- **Reproducible Research**: Automated experiment generation with publication-ready visualizations
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- **Python 3.8** or higher
+- **GPU with CUDA support** (optional but recommended for performance)
+- **16GB+ RAM** (recommended for full experiments)
+
+### Installation
+
+```bash
 # Clone the repository
 git clone https://github.com/TakudzwaChoto/HALP-FL.git
 cd HALP-FL
 
-# Create virtual environment (recommended)
+# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-Requirements File (requirements.txt)
-txt
+```
+
+### Run Experiments
+
+```bash
+python halp_fl.py
+```
+
+This will automatically execute all seven experiments and generate visualizations and result files.
+
+---
+
+## Dependencies
+
+All required packages are listed in `requirements.txt`:
+
+```
 torch>=1.12.0
 torchvision>=0.13.0
 numpy>=1.21.0
@@ -35,159 +66,237 @@ scipy>=1.7.0
 pandas>=1.3.0
 tqdm>=4.64.0
 pillow>=9.0.0
-Run the Code
-bash
-python halp_fl.py
-📁 Repository Structure
-text
+```
+
+---
+
+## Repository Structure
+
+```
 HALP-FL/
+├── halp_fl.py                          # Main implementation
+├── requirements.txt                    # Python dependencies
+├── README.MD                           # This file
 │
-├── halp_fl.py              # Main implementation file
-├── requirements.txt        # Python dependencies
-├── README.md               # This file
-│
-├── data/                   # Datasets (auto-downloaded)
+├── data/                               # Dataset storage (auto-downloaded)
 │   ├── MNIST/
 │   ├── FashionMNIST/
-│   └── CIFAR10/
+│   └── CIFAR-10/
 │
-├── figures/                # Generated visualizations
+├── figures/                            # Generated visualizations
 │   ├── overall_comparison.png
 │   ├── communication_overhead.png
 │   ├── collusion_resistance.png
 │   ├── gradient_leakage.png
 │   └── ablation_study.png
 │
-└── results/                # Experiment results (JSON format)
+└── results/                            # JSON-formatted experiment results
     ├── halpfl_results_accuracy_comparison_*.json
     └── halpfl_results_privacy_utility_*.json
-🧪 Experiments
-The code runs 7 experiments automatically:
+```
 
-#	Experiment	Description
-1	Accuracy Comparison	HALP-FL vs ADPHE-FL, CLFLDP, DP-FL on MNIST, FashionMNIST, CIFAR-10
-2	Privacy-Utility Trade-off	Accuracy at different ε levels (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
-3	Encryption Efficiency	Encryption/decryption times for key lengths 256, 512, 1024 bits
-4	Communication Overhead	Normalized communication cost per round
-5	Collusion Resistance	Attack success rate vs number of malicious clients
-6	Gradient Leakage	Reconstruction quality under different privacy protections
-7	Ablation Study	Contribution of each HALP-FL component
-📊 Output Files
-Figures Generated
-File	Description
-overall_comparison.png	Accuracy and privacy-utility plots (2x3 grid)
-communication_overhead.png	Bar chart of normalized communication costs
-collusion_resistance.png	Line plot of attack success rates
-gradient_leakage.png	Image reconstruction comparison (2x4 grid)
-ablation_study.png	Accuracy and encryption time comparison
-tables.txt	LaTeX tables ready for paper inclusion
-JSON Results
-json
+---
+
+## Experiments
+
+The framework automatically executes seven comprehensive experiments:
+
+| # | Experiment | Description | Metrics |
+|---|---|---|---|
+| 1 | **Accuracy Comparison** | HALP-FL vs. baselines (ADPHE-FL, CLFLDP, DP-FL) | Classification accuracy on MNIST, FashionMNIST, CIFAR-10 |
+| 2 | **Privacy-Utility Tradeoff** | Accuracy vs. privacy budgets | Accuracy at ε ∈ {0.5, 1.0, 2.0, 3.0, 4.0, 5.0} |
+| 3 | **Encryption Efficiency** | Homomorphic encryption performance | Encryption/decryption time for key lengths {256, 512, 1024} bits |
+| 4 | **Communication Overhead** | Normalized communication cost | Per-round communication normalized to baseline |
+| 5 | **Collusion Resistance** | Byzantine robustness evaluation | Attack success rate vs. number of malicious clients |
+| 6 | **Gradient Leakage** | Privacy attack resilience | Reconstruction quality under different privacy settings |
+| 7 | **Ablation Study** | Component contribution analysis | Impact of each HALP-FL module on accuracy and efficiency |
+
+---
+
+## Output
+
+### Generated Figures
+
+| File | Content | Purpose |
+|------|---------|---------|
+| `overall_comparison.png` | Accuracy & privacy-utility plots (2×3 grid) | Main performance comparison |
+| `communication_overhead.png` | Normalized communication costs | Scalability analysis |
+| `collusion_resistance.png` | Attack success rates over malicious clients | Adversarial robustness |
+| `gradient_leakage.png` | Image reconstruction comparisons (2×4 grid) | Privacy guarantee visualization |
+| `ablation_study.png` | Component accuracy & efficiency | Contribution analysis |
+| `tables.txt` | LaTeX-formatted tables | Direct paper integration |
+
+### Result Files
+
+Results are saved in JSON format with the following structure:
+
+```json
 {
   "experiment": "accuracy_comparison",
-  "timestamp": "2024-XX-XX",
+  "timestamp": "2026-05-13",
   "results": {
-    "mnist": {"halp": [...], "adphe": [...], ...},
+    "mnist": {
+      "halp": [accuracy_values],
+      "adphe": [accuracy_values],
+      "clfldp": [accuracy_values],
+      "dp_fl": [accuracy_values]
+    },
     "fashion": {...},
     "cifar10": {...}
   },
   "hyperparameters": {...}
 }
-⚙️ Configuration Parameters
-Key parameters in the code:
+```
 
-python
-# In run_accuracy_comparison() and other functions
-n_clients = 5           # Number of participating clients
-n_rounds = 30           # Number of communication rounds
-local_epochs = 5        # Local training epochs per round
-batch_size = 64         # Batch size for training
-learning_rate = 0.01    # Learning rate for SGD
-adjustment_factor_a = 0.8  # Round adaptivity factor
-threshold_t = 3         # Threshold for collusion resistance (t-of-n)
-To modify parameters, edit the respective function calls in generate_all_figures().
+---
 
-🔬 Reproducing Paper Results
-To reproduce exactly the numbers reported in the paper:
-Run the code as is
+## Configuration
 
-The simulated results match the paper's figures:
+Key hyperparameters can be modified in `halp_fl.py`:
 
-MNIST accuracy: 99.69%
+```python
+# Federated Learning Settings
+n_clients = 5              # Number of participating clients
+n_rounds = 30              # Communication rounds
+local_epochs = 5           # Local training epochs per round
+batch_size = 64            # Batch size for training
+learning_rate = 0.01       # SGD learning rate
 
-FashionMNIST accuracy: 93.47%
+# Privacy and Security Settings
+adjustment_factor_a = 0.8  # Round adaptivity factor (Equation 5)
+threshold_t = 3            # Threshold for collusion resistance (t-of-n)
+```
 
-CIFAR-10 accuracy: 76.17%
+To customize experiments, edit the parameter values in `generate_all_figures()` function.
 
-To run with real FL training (no simulation):
-Uncomment the actual training loops and comment out the simulated accuracy values. Note: This will take significantly longer (30 rounds × 5 clients × 5 epochs).
+---
 
-📝 Code Structure
-python
-# Core Classes
-HALPFLClient          # Client with sensitivity, KL-div, progress tracking
-MNIST_CNN             # CNN model for MNIST/FashionMNIST
-CIFAR_CNN             # CNN model for CIFAR-10
+## Reproducing Paper Results
 
-# Core Functions
-train_client()        # Local training with DP noise + HE simulation
-federated_averaging() # Server-side parameter aggregation
-compute_epsilon()     # Equation (5): ε_i,t = ε · (t^a/Σ) · (1-s_i) · (1-h_i) · p_t
+### To reproduce the reported results:
 
-# Experiment Functions
-run_accuracy_comparison()      # Experiment 1
-run_privacy_utility_experiment() # Experiment 2
-measure_encryption_efficiency()  # Experiment 3
-measure_communication_overhead() # Experiment 4
-simulate_collusion_attacks()     # Experiment 5
-simulate_gradient_leakage()      # Experiment 6
-run_ablation_study()            # Experiment 7
+1. Run the code as-is (uses simulated results matching paper):
 
-# Output Functions
-save_results_to_json()   # Save results
-generate_tables()        # Generate LaTeX tables
-generate_all_figures()   # Main orchestrator
-🔧 Troubleshooting
-Common Issues
-Issue	Solution
-ModuleNotFoundError	Run pip install -r requirements.txt
-CUDA out of memory	Change device='cpu' in generate_all_figures()
-Dataset download fails	Check internet connection; manually download from torchvision
-Figures not displaying	Use plt.savefig() instead of plt.show() for headless servers
-Running Without Display
-python
-# For servers without GUI, disable plt.show()
-# Comment out all plt.show() lines in the code
-# Figures will still be saved as PNG/PDF files
-📄 Citation
-If you use this code in your research, please cite:
+```bash
+python halp_fl.py
+```
 
-bibtex
+**Expected Accuracies** (simulated):
+- MNIST: **99.69%**
+- FashionMNIST: **93.47%**
+- CIFAR-10: **76.17%**
+
+### To run full end-to-end training:
+
+⚠️ **Note**: Full training is computationally intensive (30 rounds × 5 clients × 5 epochs each).
+
+1. In `halp_fl.py`, uncomment the actual training loops
+2. Comment out the simulated accuracy values
+3. Execute: `python halp_fl.py`
+
+---
+
+## Code Architecture
+
+### Core Classes
+
+```python
+HALPFLClient              # Client with sensitivity tracking, KL-divergence, and progress metrics
+MNIST_CNN                 # CNN architecture for MNIST/FashionMNIST
+CIFAR_CNN                 # CNN architecture for CIFAR-10
+```
+
+### Core Functions
+
+```python
+train_client()                    # Local training with DP noise and HE simulation
+federated_averaging()             # Server-side parameter aggregation
+compute_epsilon()                 # Privacy budget computation: ε_i,t = ε·(t^a/Σ)·(1-s_i)·(1-h_i)·p_t
+
+# Experiment Orchestration
+run_accuracy_comparison()         # Experiment 1
+run_privacy_utility_experiment()  # Experiment 2
+measure_encryption_efficiency()   # Experiment 3
+measure_communication_overhead()  # Experiment 4
+simulate_collusion_attacks()      # Experiment 5
+simulate_gradient_leakage()       # Experiment 6
+run_ablation_study()              # Experiment 7
+
+# Output Management
+save_results_to_json()            # Persist results
+generate_tables()                 # LaTeX table generation
+generate_all_figures()            # Main orchestrator
+```
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
+| CUDA out of memory | Set `device='cpu'` in `generate_all_figures()` |
+| Dataset download failure | Check internet connection; manually download from [PyTorch Vision](https://pytorch.org/vision/) |
+| Figures not displaying | Use `plt.savefig()` instead of `plt.show()` on headless servers |
+| Slow execution | Enable GPU acceleration or reduce `n_rounds`, `n_clients` |
+
+### Running on Headless Servers
+
+For systems without a display:
+
+```python
+# Comment out all plt.show() calls in halp_fl.py
+# Figures will be saved automatically as PNG/PDF files
+import matplotlib
+matplotlib.use('Agg')  # Add at the beginning of halp_fl.py
+```
+
+---
+
+## Citing This Work
+
+If you use HALP-FL in your research, please cite:
+
+```bibtex
 @article{choto2025halpfl,
-  title={HALP-FL: Hybrid Adaptive Layered Privacy Framework for Federated Learning with Client-Specific Differential Privacy and Threshold Homomorphic Encryption},
-  author={Choto, Takudzwa and Huang, Xiaofang and Odoom, Justice and Min, Fan and Banda, William and Xiao, Ruifeng and Lei, Hongxia and Wang, Chengran and Seid, Muhammed Ahmed},
+  title={HALP-FL: Hybrid Adaptive Layered Privacy Framework for Federated Learning with 
+         Client-Specific Differential Privacy and Threshold Homomorphic Encryption},
+  author={Choto, Takudzwa and Huang, Xiaofang and Odoom, Justice and Min, Fan and Banda, William 
+          and Xiao, Ruifeng and Lei, Hongxia and Wang, Chengran and Seid, Muhammed Ahmed},
   journal={Peer-to-Peer Networking and Applications},
   year={2025}
 }
-📧 Contact
-Corresponding authors: Takudzwa Choto (ctakudzwa95@gmail.com), William Banda (adsonwilliambanda@gmail.com)
+```
 
-GitHub Issues: https://github.com/TakudzwaChoto/HALP-FL/issues
+---
 
-📜 License
-This code is provided for reproducibility purposes. Please contact the authors for usage permissions.
+## Contact & Support
 
-✅ Reproducibility Checklist
-Source code provided
+**Corresponding Authors:**
+- Takudzwa Choto (ctakudzwa95@gmail.com)
+- William Banda (adsonwilliambanda@gmail.com)
 
-Dependencies listed in requirements.txt
+**Report Issues:** [GitHub Issues](https://github.com/TakudzwaChoto/HALP-FL/issues)
 
-Random seeds fixed (though not explicitly set - add torch.manual_seed(42) for exact reproducibility)
+---
 
-Dataset auto-download included
+## License
 
-All figures generated automatically
+This code is provided for research and reproducibility purposes. Please contact the authors for usage permissions and licensing inquiries.
 
-Results saved to JSON
+---
 
-LaTeX tables generated
+## Reproducibility Checklist
+
+- ✅ Complete source code provided
+- ✅ Dependencies explicitly listed in `requirements.txt`
+- ✅ Automated dataset download included
+- ✅ All figures generated automatically
+- ✅ Results saved in machine-readable JSON format
+- ✅ LaTeX tables for direct paper integration
+- ✅ Comprehensive documentation
+- ⚠️ Set `torch.manual_seed(42)` for bit-exact reproducibility
+
+---
+
+**Last Updated:** May 13, 2026
