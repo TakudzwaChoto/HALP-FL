@@ -250,24 +250,6 @@ For systems without a display:
 import matplotlib
 matplotlib.use('Agg')  # Add at the beginning of halp_fl.py
 ```
-
----
-
-## Citing This Work
-
-If you use HALP-FL in your research, please cite:
-
-```bibtex
-@article{choto2025halpfl,
-  title={HALP-FL: Hybrid Adaptive Layered Privacy Framework for Federated Learning with 
-         Client-Specific Differential Privacy and Threshold Homomorphic Encryption},
-  author={Choto, Takudzwa and Huang, Xiaofang and Odoom, Justice and Min, Fan and Banda, William 
-          and Xiao, Ruifeng and Lei, Hongxia and Wang, Chengran and Seid, Muhammed Ahmed},
-  journal={Peer-to-Peer Networking and Applications},
-  year={2025}
-}
-```
-
 ---
 
 ## Contact & Support
@@ -291,11 +273,8 @@ This code is provided for research and reproducibility purposes. Please contact 
 - ✅ Complete source code provided
 - ✅ Dependencies explicitly listed in `requirements.txt`
 - ✅ Automated dataset download included
-- ✅ All figures generated automatically
-- ✅ Results saved in machine-readable JSON format
-- ✅ LaTeX tables for direct paper integration
 - ✅ Comprehensive documentation
-- ⚠️ Set `torch.manual_seed(42)` for bit-exact reproducibility
+- Set `torch.manual_seed(42)` for bit-exact reproducibility
 
 ---
 
