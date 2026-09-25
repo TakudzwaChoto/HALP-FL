@@ -115,15 +115,15 @@ HALP-FL/
 
 The framework executes seven experiments matching the paper:
 
-| # | Experiment | Paper reference | Output figure |
+| # | Experiment | Output figure |
 |---|---|---|---|
-| 1 | Accuracy comparison at $\varepsilon = 1$ and $\varepsilon = 3$ | Table 5 | `overall_comparison.png` |
-| 2 | Privacy–utility trade-off across $\varepsilon \in \{0.5, 1, 2, 3, 4, 5\}$ | Figure 5 | `privacy_utility_tradeoff.png` |
-| 3 | Encryption/decryption time for key lengths {256, 512, 1024} bits | Table 7 | `communication_overhead.png` |
-| 4 | Communication overhead per round, normalized to FedAvg | Figure 6 | `communication_overhead.png` |
-| 5 | Collusion resistance vs. number of malicious clients | Figure 7, Tables 8, 12 | `collusion_resistance.png` |
-| 6 | Gradient inversion attack resilience | Figure 8, Table 11 | `gradient_leakage.png` |
-| 7 | Ablation study on CIFAR-10 at $\varepsilon = 1$ | Table 10 | `ablation_study.png` |
+| 1 | Accuracy comparison at $\varepsilon = 1$ and $\varepsilon = 3$ | `overall_comparison.png` |
+| 2 | Privacy–utility trade-off across $\varepsilon \in \{0.5, 1, 2, 3, 4, 5\}$ | `privacy_utility_tradeoff.png` |
+| 3 | Encryption/decryption time for key lengths {256, 512, 1024} bits | `communication_overhead.png` |
+| 4 | Communication overhead per round, normalized to FedAvg | `communication_overhead.png` |
+| 5 | Collusion resistance vs. number of malicious clients | `collusion_resistance.png` |
+| 6 | Gradient inversion attack resilience | `gradient_leakage.png` |
+| 7 | Ablation study on CIFAR-10 at $\varepsilon = 1$ | `ablation_study.png` |
 
 All experiments use the Dirichlet partition $\alpha = 0.5$ for the non-IID setting, as described in the paper.
 
