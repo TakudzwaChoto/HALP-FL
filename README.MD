@@ -7,10 +7,6 @@
 
 HALP-FL is a reference implementation of a hybrid federated learning framework that integrates **client-specific differential privacy** with **threshold homomorphic encryption** and a **closed-loop risk-adaptive privacy controller**. The framework's central architectural contribution is a *dual-use risk signal*: the same anomaly score that triggers conditional cryptographic verification within a round is also fed back to modulate the differential-privacy budget of subsequent rounds. This closes a loop that prior hybrid DP/HE work leaves open.
 
-The implementation accompanies the paper:
-
-> Choto T, Huang X, Odoom J, Min F, Banda W, Xiao R, Lei H, Wang C, Seid MA. HALP-FL: Risk-Responsive Privacy with Collusion-Aware Threshold Encryption for Federated Learning. *Transactions on Emerging Telecommunications Technologies* (under review).
-
 ### Important scope note
 
 The framework protects two disjoint parameter subsets with two different mechanisms:
