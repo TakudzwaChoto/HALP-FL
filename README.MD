@@ -4,9 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
+
 HALP-FL is a reference implementation of a hybrid federated learning framework that integrates **client-specific differential privacy** with **threshold homomorphic encryption** and a **closed-loop risk-adaptive privacy controller**. The framework's central architectural contribution is a *dual-use risk signal*: the same anomaly score that triggers conditional cryptographic verification within a round is also fed back to modulate the differential-privacy budget of subsequent rounds. This closes a loop that prior hybrid DP/HE work leaves open.
 
 ### Important scope note
+
 The framework protects two disjoint parameter subsets with two different mechanisms:
 
 - The **DP-protected subset** $\mathcal{W}_{\mathrm{DP}}$ receives calibrated Gaussian noise and satisfies $(\varepsilon, \delta)$-differential privacy under the accounting.
@@ -16,6 +18,7 @@ The verification layer is a **proof-of-concept design**: the Bulletproof range p
 ---
 
 ## Key Features
+
 - **Dual-use risk signal** (primary contribution): a single anomaly score drives both (a) selective cryptographic verification within a round and (b) risk-weighted privacy budget hardening in subsequent rounds.
 - **Client-specific adaptive DP**: per-client, per-round privacy budgets $\varepsilon_{i,t}$ that depend on data sensitivity $s_i$, non-IID degree $h_i$, training progress $p_t$, and a running risk estimate $r_i$.
 - **Threshold Paillier aggregation**: $(t, n)$ threshold encryption, so decryption requires at least $t$ clients to collaborate. Standard Paillier fails with a single colluding client; HALP-FL resists up to $t - 1$.
@@ -25,12 +28,15 @@ The verification layer is a **proof-of-concept design**: the Bulletproof range p
 ---
 
 ## Quick Start
+
 ### Prerequisites
+
 - Python 3.8 or higher (tested on 3.10 and 3.11)
 - GPU with CUDA support (recommended; CPU fallback supported)
 - 32 GB+ RAM for full experiments
 
 ### Installation
+
 ```bash
 git clone https://github.com/TakudzwaChoto/HALP-FL.git
 cd HALP-FL
@@ -41,6 +47,7 @@ source venv/bin/activate    # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 ### Running the code
+
 The repository supports two modes.
 
 **Fast preview mode (smoke test, does not reproduce the paper).** This mode runs the full experimental pipeline with a small number of rounds and clients to verify that the code is functional. It prints illustrative numbers only and is not intended to reproduce the paper's results.
@@ -58,6 +65,7 @@ We strongly recommend the full mode when evaluating the paper's claims. The prev
 ---
 
 ## Dependencies
+
 All required packages are listed in `requirements.txt`:
 
 ```
@@ -104,6 +112,7 @@ HALP-FL/
 
 ---
 ## Experiments
+
 The framework executes seven experiments matching the paper:
 
 | # | Experiment | Paper reference | Output figure |
@@ -120,6 +129,7 @@ All experiments use the Dirichlet partition $\alpha = 0.5$ for the non-IID setti
 
 ---
 ## Configuration
+
 The default parameters match the paper's Table 4. They can be modified in `halp_fl.py`:
 
 ```python
@@ -139,6 +149,7 @@ smoothing_eta   = 0.3         # Risk estimate smoothing factor (Eq. 25)
 anomaly_lambda  = 3           # Anomaly threshold for risk detection (Section 5.4.2)
 
 # Threshold HE settings
+
 threshold_t     = 3           # t-of-n threshold (t = floor(N/2) + 1)
 key_lengths     = [256, 512, 1024]   # Paillier key lengths to evaluate
 ```
@@ -151,6 +162,7 @@ python halp_fl.py --full
 ---
 
 ## Implementation Notes
+
 ### The deployed allocation is a privacy-priority heuristic
 
 The paper distinguishes between two allocations:
@@ -194,14 +206,17 @@ def update_risk_estimate(r_i, z_t, eta, lambda_):
 ```
 
 ### Threshold Paillier
+
 The threshold Paillier implementation follows the distributed key generation protocol of Fouque, Poupard, and Stern (2000), which is robust against up to $t - 1$ malicious participants during key generation. Decryption is non-interactive: each client produces a partial decryption independently and the server combines any $t$ valid partial decryptions. In our experiments with $N = 5$, $t = 3$, we observed fewer than 1% decryption failures per round due to client dropouts.
 
 ### The verification layer
+
 The Bulletproof range proof and the Paillier ciphertext are linked by a cross-group linkage proof whose concrete sound construction is left to future work (Section 5.4.4.2 of the paper). The verification code in this repository implements the range-proof component and the ciphertext-side check **separately**; it does not implement the linkage proof, and therefore does not provide the integrity guarantee that a sound linkage proof would provide. The verification layer should be treated as a proof-of-concept design rather than a deployable cryptographic mechanism.
 
 ---
 
 ## Output
+
 ### Generated figures
 
 | File | Content |
@@ -214,6 +229,7 @@ The Bulletproof range proof and the Paillier ciphertext are linked by a cross-gr
 | `ablation_study.png` | Component contributions on CIFAR-10 |
 
 ### Result files
+
 Results are saved in JSON format with the following structure:
 
 ```json
@@ -251,6 +267,7 @@ The `mode` field is either `"full"` (paper-reproducing) or `"preview"` (illustra
 ---
 
 ## Reproducing the paper's results
+
 To reproduce the numbers reported in the paper:
 
 ```bash
@@ -291,6 +308,7 @@ Results are means of five independent runs with different random seeds. Standard
 | Threshold decryption fails | Ensure at least `t` clients are online and reachable in the same round |
 
 ### Running on headless servers
+
 ```python
 import matplotlib
 matplotlib.use('Agg')
@@ -301,6 +319,7 @@ Place this at the top of `halp_fl.py`, and comment out any `plt.show()` calls. F
 ---
 
 ## Security and scope
+
 The framework provides three distinct guarantees. They should not be conflated:
 
 1. **Differential privacy for $\mathcal{W}_{\mathrm{DP}}$**: the DP-protected parameter subset satisfies $(\varepsilon, \delta)$-DP with $\varepsilon$ the cumulative budget over $T$ rounds. This guarantee is what the paper's accuracy claims refer to.
