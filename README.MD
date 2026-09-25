@@ -4,22 +4,18 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
-
 HALP-FL is a reference implementation of a hybrid federated learning framework that integrates **client-specific differential privacy** with **threshold homomorphic encryption** and a **closed-loop risk-adaptive privacy controller**. The framework's central architectural contribution is a *dual-use risk signal*: the same anomaly score that triggers conditional cryptographic verification within a round is also fed back to modulate the differential-privacy budget of subsequent rounds. This closes a loop that prior hybrid DP/HE work leaves open.
 
 ### Important scope note
-
 The framework protects two disjoint parameter subsets with two different mechanisms:
 
-- The **DP-protected subset** $\mathcal{W}_{\mathrm{DP}}$ receives calibrated Gaussian noise and satisfies $(\varepsilon, \delta)$-differential privacy under the accounting in Section 5.2.7 of the paper.
+- The **DP-protected subset** $\mathcal{W}_{\mathrm{DP}}$ receives calibrated Gaussian noise and satisfies $(\varepsilon, \delta)$-differential privacy under the accounting.
 - The **HE-protected subset** $\mathcal{W}_{\mathrm{HE}}$ is protected by $(t,n)$ threshold Paillier confidentiality during aggregation. It does **not** carry DP noise, and the composite release is not $(\varepsilon, \delta)$-DP as a whole. Whenever the paper reports accuracy "at $\varepsilon = 1$", this refers to the DP budget of $\mathcal{W}_{\mathrm{DP}}$ only. Proposition 4 in the paper characterizes exactly what each mechanism does and does not protect.
 
-The verification layer is a **proof-of-concept design**: the Bulletproof range proof and the Paillier ciphertext are linked by a cross-group linkage proof whose concrete sound and efficient construction is left to future work. See Section 5.4.4 of the paper.
-
+The verification layer is a **proof-of-concept design**: the Bulletproof range proof and the Paillier ciphertext are linked by a cross-group linkage proof whose concrete sound and efficient construction is left to future work. 
 ---
 
 ## Key Features
-
 - **Dual-use risk signal** (primary contribution): a single anomaly score drives both (a) selective cryptographic verification within a round and (b) risk-weighted privacy budget hardening in subsequent rounds.
 - **Client-specific adaptive DP**: per-client, per-round privacy budgets $\varepsilon_{i,t}$ that depend on data sensitivity $s_i$, non-IID degree $h_i$, training progress $p_t$, and a running risk estimate $r_i$.
 - **Threshold Paillier aggregation**: $(t, n)$ threshold encryption, so decryption requires at least $t$ clients to collaborate. Standard Paillier fails with a single colluding client; HALP-FL resists up to $t - 1$.
@@ -29,15 +25,12 @@ The verification layer is a **proof-of-concept design**: the Bulletproof range p
 ---
 
 ## Quick Start
-
 ### Prerequisites
-
 - Python 3.8 or higher (tested on 3.10 and 3.11)
 - GPU with CUDA support (recommended; CPU fallback supported)
 - 32 GB+ RAM for full experiments
 
 ### Installation
-
 ```bash
 git clone https://github.com/TakudzwaChoto/HALP-FL.git
 cd HALP-FL
@@ -47,9 +40,7 @@ source venv/bin/activate    # On Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
 ```
-
 ### Running the code
-
 The repository supports two modes.
 
 **Fast preview mode (smoke test, does not reproduce the paper).** This mode runs the full experimental pipeline with a small number of rounds and clients to verify that the code is functional. It prints illustrative numbers only and is not intended to reproduce the paper's results.
@@ -58,18 +49,15 @@ The repository supports two modes.
 python halp_fl.py --preview
 ```
 
-**Full training mode (reproduces the paper).** This mode runs the complete end-to-end federated training pipeline with the paper's configuration (30 rounds, 5 clients, 10 local epochs for MNIST and 20 for FashionMNIST / CIFAR-10). On a single NVIDIA V100 it takes approximately 3–4 hours per dataset, and approximately 10 hours for all three datasets.
+**Full training mode (reproduces the paper).** This mode runs the complete end-to-end federated training pipeline with the paper's configuration (30 rounds, 5 clients, 10 local epochs for MNIST and 20 for FashionMNIST / CIFAR-10). On a single NVIDIA V100, it takes approximately 3–4 hours per dataset, and approximately 10 hours for all three datasets.
 
 ```bash
 python halp_fl.py --full
 ```
-
 We strongly recommend the full mode when evaluating the paper's claims. The preview mode exists only for pipeline verification.
-
 ---
 
 ## Dependencies
-
 All required packages are listed in `requirements.txt`:
 
 ```
@@ -84,13 +72,10 @@ pandas>=1.3.0
 tqdm>=4.64.0
 pillow>=9.0.0
 ```
-
 Threshold Paillier operations are implemented in pure Python on top of the `python-paillier` library (version 1.4.0). Bulletproof verification uses a Rust implementation with Python bindings.
-
 ---
 
 ## Repository Structure
-
 ```
 HALP-FL/
 ├── halp_fl.py                   # Main implementation and experiment orchestrator
@@ -118,9 +103,7 @@ HALP-FL/
 ```
 
 ---
-
 ## Experiments
-
 The framework executes seven experiments matching the paper:
 
 | # | Experiment | Paper reference | Output figure |
@@ -136,9 +119,7 @@ The framework executes seven experiments matching the paper:
 All experiments use the Dirichlet partition $\alpha = 0.5$ for the non-IID setting, as described in the paper.
 
 ---
-
 ## Configuration
-
 The default parameters match the paper's Table 4. They can be modified in `halp_fl.py`:
 
 ```python
@@ -167,11 +148,9 @@ To run with a custom configuration, edit these values and invoke the full mode:
 ```bash
 python halp_fl.py --full
 ```
-
 ---
 
 ## Implementation Notes
-
 ### The deployed allocation is a privacy-priority heuristic
 
 The paper distinguishes between two allocations:
@@ -215,17 +194,14 @@ def update_risk_estimate(r_i, z_t, eta, lambda_):
 ```
 
 ### Threshold Paillier
-
 The threshold Paillier implementation follows the distributed key generation protocol of Fouque, Poupard, and Stern (2000), which is robust against up to $t - 1$ malicious participants during key generation. Decryption is non-interactive: each client produces a partial decryption independently and the server combines any $t$ valid partial decryptions. In our experiments with $N = 5$, $t = 3$, we observed fewer than 1% decryption failures per round due to client dropouts.
 
 ### The verification layer
-
 The Bulletproof range proof and the Paillier ciphertext are linked by a cross-group linkage proof whose concrete sound construction is left to future work (Section 5.4.4.2 of the paper). The verification code in this repository implements the range-proof component and the ciphertext-side check **separately**; it does not implement the linkage proof, and therefore does not provide the integrity guarantee that a sound linkage proof would provide. The verification layer should be treated as a proof-of-concept design rather than a deployable cryptographic mechanism.
 
 ---
 
 ## Output
-
 ### Generated figures
 
 | File | Content |
@@ -238,7 +214,6 @@ The Bulletproof range proof and the Paillier ciphertext are linked by a cross-gr
 | `ablation_study.png` | Component contributions on CIFAR-10 |
 
 ### Result files
-
 Results are saved in JSON format with the following structure:
 
 ```json
@@ -276,7 +251,6 @@ The `mode` field is either `"full"` (paper-reproducing) or `"preview"` (illustra
 ---
 
 ## Reproducing the paper's results
-
 To reproduce the numbers reported in the paper:
 
 ```bash
@@ -294,7 +268,6 @@ This runs the complete training pipeline with the paper's hyperparameters and wr
 | CIFAR-10 | 76.17% | 74.00% |
 
 **Expected results at $\varepsilon = 3$ (DP-protected subset):**
-
 | Dataset | HALP-FL | ADPHE-FL (reimpl.) | CLFLDP | DP-FL |
 |---|---|---|---|---|
 | MNIST | 99.71% | 96.80% | 95.00% | 90.00% |
@@ -308,7 +281,6 @@ Results are means of five independent runs with different random seeds. Standard
 ---
 
 ## Troubleshooting
-
 | Issue | Solution |
 |---|---|
 | `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
@@ -319,7 +291,6 @@ Results are means of five independent runs with different random seeds. Standard
 | Threshold decryption fails | Ensure at least `t` clients are online and reachable in the same round |
 
 ### Running on headless servers
-
 ```python
 import matplotlib
 matplotlib.use('Agg')
@@ -330,7 +301,6 @@ Place this at the top of `halp_fl.py`, and comment out any `plt.show()` calls. F
 ---
 
 ## Security and scope
-
 The framework provides three distinct guarantees. They should not be conflated:
 
 1. **Differential privacy for $\mathcal{W}_{\mathrm{DP}}$**: the DP-protected parameter subset satisfies $(\varepsilon, \delta)$-DP with $\varepsilon$ the cumulative budget over $T$ rounds. This guarantee is what the paper's accuracy claims refer to.
@@ -341,7 +311,6 @@ The following attacks are out of scope and are not evaluated: norm-constrained a
 
 ---
 ## License
-
 This code is released under the MIT License. See `LICENSE` for details.
 
 The threshold Paillier implementation is built on top of `python-paillier` (MIT License). The Bulletproof verification uses a Rust implementation with Python bindings; see `requirements.txt` and the acknowledgments section of the paper for details.
