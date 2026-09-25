@@ -207,7 +207,7 @@ def update_risk_estimate(r_i, z_t, eta, lambda_):
 
 ### Threshold Paillier
 
-The threshold Paillier implementation follows the distributed key generation protocol of Fouque, Poupard, and Stern (2000), which is robust against up to $t - 1$ malicious participants during key generation. Decryption is non-interactive: each client produces a partial decryption independently and the server combines any $t$ valid partial decryptions. In our experiments with $N = 5$, $t = 3$, we observed fewer than 1% decryption failures per round due to client dropouts.
+The threshold Paillier implementation follows the distributed key generation protocol of Fouque, Poupard, and Stern (2000), which is robust against up to $t - 1$ malicious participants during key generation. Decryption is non-interactive: each client produces a partial decryption independently, and the server combines any $t$ valid partial decryptions. In our experiments with $N = 5$, $t = 3$, we observed fewer than 1% decryption failures per round due to client dropouts.
 
 ### The verification layer
 
