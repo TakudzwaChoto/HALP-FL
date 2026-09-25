@@ -1,20 +1,34 @@
-# HALP-FL: Provably Optimal Privacy Allocation for Secure Federated Learning
+# HALP-FL: Risk-Responsive Privacy Allocation with Threshold Encryption for Federated Learning
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-Custom-green.svg)](#license)
-[![Paper](https://img.shields.io/badge/paper-Peer--to--Peer%20Networking-blue)](https://link.springer.com/journal/12083)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
 
-HALP-FL is a comprehensive implementation of a hybrid federated learning framework that integrates **client-specific differential privacy** with **threshold homomorphic encryption** to provide provably optimal privacy allocation in distributed machine learning environments. This framework addresses the challenge of balancing privacy-utility tradeoffs while maintaining computational efficiency in federated settings.
+HALP-FL is a reference implementation of a hybrid federated learning framework that integrates **client-specific differential privacy** with **threshold homomorphic encryption** and a **closed-loop risk-adaptive privacy controller**. The framework's central architectural contribution is a *dual-use risk signal*: the same anomaly score that triggers conditional cryptographic verification within a round is also fed back to modulate the differential-privacy budget of subsequent rounds. This closes a loop that prior hybrid DP/HE work leaves open.
 
-### Key Features
+The implementation accompanies the paper:
 
-- **Adaptive Privacy Allocation**: Client-specific differential privacy budgets based on data sensitivity and progress
-- **Homomorphic Encryption Integration**: Threshold encryption for secure parameter aggregation
-- **Comprehensive Benchmarking**: Seven experimental scenarios including accuracy, privacy-utility tradeoffs, and adversarial robustness
-- **Production-Ready Code**: Fully documented with support for multiple datasets (MNIST, FashionMNIST, CIFAR-10)
+> Choto T, Huang X, Odoom J, Min F, Banda W, Xiao R, Lei H, Wang C, Seid MA. HALP-FL: Risk-Responsive Privacy with Collusion-Aware Threshold Encryption for Federated Learning. *Transactions on Emerging Telecommunications Technologies* (under review).
 
+### Important scope note
+
+The framework protects two disjoint parameter subsets with two different mechanisms:
+
+- The **DP-protected subset** $\mathcal{W}_{\mathrm{DP}}$ receives calibrated Gaussian noise and satisfies $(\varepsilon, \delta)$-differential privacy under the accounting in Section 5.2.7 of the paper.
+- The **HE-protected subset** $\mathcal{W}_{\mathrm{HE}}$ is protected by $(t,n)$ threshold Paillier confidentiality during aggregation. It does **not** carry DP noise, and the composite release is not $(\varepsilon, \delta)$-DP as a whole. Whenever the paper reports accuracy "at $\varepsilon = 1$", this refers to the DP budget of $\mathcal{W}_{\mathrm{DP}}$ only. Proposition 4 in the paper characterizes exactly what each mechanism does and does not protect.
+
+The verification layer is a **proof-of-concept design**: the Bulletproof range proof and the Paillier ciphertext are linked by a cross-group linkage proof whose concrete sound and efficient construction is left to future work. See Section 5.4.4 of the paper.
+
+---
+
+## Key Features
+
+- **Dual-use risk signal** (primary contribution): a single anomaly score drives both (a) selective cryptographic verification within a round and (b) risk-weighted privacy budget hardening in subsequent rounds.
+- **Client-specific adaptive DP**: per-client, per-round privacy budgets $\varepsilon_{i,t}$ that depend on data sensitivity $s_i$, non-IID degree $h_i$, training progress $p_t$, and a running risk estimate $r_i$.
+- **Threshold Paillier aggregation**: $(t, n)$ threshold encryption, so decryption requires at least $t$ clients to collaborate. Standard Paillier fails with a single colluding client; HALP-FL resists up to $t - 1$.
+- **Risk-activated verification**: Bulletproof range proofs generated only when the anomaly score exceeds a threshold (activated in fewer than 5% of rounds in our experiments).
+- **Efficiency optimizations**: mean-$k$ clipping, top-$k$ sparsification, and random DP/HE assignment reduce encrypted parameter count by 70–80% relative to encrypting all parameters.
 
 ---
 
@@ -22,32 +36,39 @@ HALP-FL is a comprehensive implementation of a hybrid federated learning framewo
 
 ### Prerequisites
 
-- **Python 3.8** or higher
-- **GPU with CUDA support** (recommended for performance)
-- **32GB+ RAM** (recommended for full experiments)
+- Python 3.8 or higher (tested on 3.10 and 3.11)
+- GPU with CUDA support (recommended; CPU fallback supported)
+- 32 GB+ RAM for full experiments
 
 ### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/TakudzwaChoto/HALP-FL.git
 cd HALP-FL
 
-# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate    # On Windows: venv\Scripts\activate
 
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### Run Experiments
+### Running the code
+
+The repository supports two modes.
+
+**Fast preview mode (smoke test, does not reproduce the paper).** This mode runs the full experimental pipeline with a small number of rounds and clients to verify that the code is functional. It prints illustrative numbers only and is not intended to reproduce the paper's results.
 
 ```bash
-python halp_fl.py
+python halp_fl.py --preview
 ```
 
-This will automatically execute all seven experiments and generate visualizations and result files.
+**Full training mode (reproduces the paper).** This mode runs the complete end-to-end federated training pipeline with the paper's configuration (30 rounds, 5 clients, 10 local epochs for MNIST and 20 for FashionMNIST / CIFAR-10). On a single NVIDIA V100 it takes approximately 3–4 hours per dataset, and approximately 10 hours for all three datasets.
+
+```bash
+python halp_fl.py --full
+```
+
+We strongly recommend the full mode when evaluating the paper's claims. The preview mode exists only for pipeline verification.
 
 ---
 
@@ -68,72 +89,167 @@ tqdm>=4.64.0
 pillow>=9.0.0
 ```
 
+Threshold Paillier operations are implemented in pure Python on top of the `python-paillier` library (version 1.4.0). Bulletproof verification uses a Rust implementation with Python bindings.
+
 ---
 
 ## Repository Structure
 
 ```
 HALP-FL/
-├── halp_fl.py                          # Main implementation
-├── requirements.txt                    # Python dependencies
-├── README.MD                           # This file
+├── halp_fl.py                   # Main implementation and experiment orchestrator
+├── requirements.txt             # Python dependencies
+├── README.md                    # This file
+├── LICENSE                      # MIT license
 │
-├── data/                               # Dataset storage (auto-downloaded)
+├── data/                        # Datasets (auto-downloaded on first run)
 │   ├── MNIST/
 │   ├── FashionMNIST/
 │   └── CIFAR-10/
 │
-├── figures/                            # Generated visualizations
+├── figures/                     # Generated visualizations
 │   ├── overall_comparison.png
+│   ├── privacy_utility_tradeoff.png
 │   ├── communication_overhead.png
 │   ├── collusion_resistance.png
 │   ├── gradient_leakage.png
 │   └── ablation_study.png
 │
-└── results/                            # JSON-formatted experiment results
+└── results/                     # JSON-formatted experiment results
     ├── halpfl_results_accuracy_comparison_*.json
-    └── halpfl_results_privacy_utility_*.json
+    ├── halpfl_results_privacy_utility_*.json
+    └── halpfl_results_ablation_*.json
 ```
 
 ---
 
 ## Experiments
 
-The framework automatically executes seven comprehensive experiments:
+The framework executes seven experiments matching the paper:
 
-| # | Experiment | Description | Metrics |
+| # | Experiment | Paper reference | Output figure |
 |---|---|---|---|
-| 1 | **Accuracy Comparison** | HALP-FL vs. baselines (ADPHE-FL, CLFLDP, DP-FL) | Classification accuracy on MNIST, FashionMNIST, CIFAR-10 |
-| 2 | **Privacy-Utility Tradeoff** | Accuracy vs. privacy budgets | Accuracy at ε ∈ {0.5, 1.0, 2.0, 3.0, 4.0, 5.0} |
-| 3 | **Encryption Efficiency** | Homomorphic encryption performance | Encryption/decryption time for key lengths {256, 512, 1024} bits |
-| 4 | **Communication Overhead** | Normalized communication cost | Per-round communication normalized to baseline |
-| 5 | **Collusion Resistance** | Byzantine robustness evaluation | Attack success rate vs. number of malicious clients |
-| 6 | **Gradient Leakage** | Privacy attack resilience | Reconstruction quality under different privacy settings |
-| 7 | **Ablation Study** | Component contribution analysis | Impact of each HALP-FL module on accuracy and efficiency |
+| 1 | Accuracy comparison at $\varepsilon = 1$ and $\varepsilon = 3$ | Table 5 | `overall_comparison.png` |
+| 2 | Privacy–utility trade-off across $\varepsilon \in \{0.5, 1, 2, 3, 4, 5\}$ | Figure 5 | `privacy_utility_tradeoff.png` |
+| 3 | Encryption/decryption time for key lengths {256, 512, 1024} bits | Table 7 | `communication_overhead.png` |
+| 4 | Communication overhead per round, normalized to FedAvg | Figure 6 | `communication_overhead.png` |
+| 5 | Collusion resistance vs. number of malicious clients | Figure 7, Tables 8, 12 | `collusion_resistance.png` |
+| 6 | Gradient inversion attack resilience | Figure 8, Table 11 | `gradient_leakage.png` |
+| 7 | Ablation study on CIFAR-10 at $\varepsilon = 1$ | Table 10 | `ablation_study.png` |
+
+All experiments use the Dirichlet partition $\alpha = 0.5$ for the non-IID setting, as described in the paper.
+
+---
+
+## Configuration
+
+The default parameters match the paper's Table 4. They can be modified in `halp_fl.py`:
+
+```python
+# Federated learning settings
+n_clients       = 5           # Number of participating clients
+n_rounds        = 30          # Communication rounds
+local_epochs    = {'mnist': 10, 'fashion': 20, 'cifar10': 20}
+batch_size      = 64
+learning_rate   = 0.001       # SGD learning rate (paper's Table 4)
+
+# Privacy settings
+epsilon_values  = [1, 2, 3]   # Cumulative DP budget for the DP-protected subset
+delta           = 1e-5        # DP failure probability
+adjustment_a    = 0.8         # Round-adaptivity factor (Eq. 24)
+hardening_beta  = 0.5         # Closed-loop hardening strength (Eq. 26)
+smoothing_eta   = 0.3         # Risk estimate smoothing factor (Eq. 25)
+anomaly_lambda  = 3           # Anomaly threshold for risk detection (Section 5.4.2)
+
+# Threshold HE settings
+threshold_t     = 3           # t-of-n threshold (t = floor(N/2) + 1)
+key_lengths     = [256, 512, 1024]   # Paillier key lengths to evaluate
+```
+
+To run with a custom configuration, edit these values and invoke the full mode:
+
+```bash
+python halp_fl.py --full
+```
+
+---
+
+## Implementation Notes
+
+### The deployed allocation is a privacy-priority heuristic
+
+The paper distinguishes between two allocations:
+
+- **Utility-optimal reference** (Eq. 12): minimizes total noise variance subject to the budget constraint; assigns *larger* budgets to high-sensitivity clients. This is the mathematically optimal allocation under idealized assumptions.
+- **Deployed privacy-priority heuristic** (Eq. 15): assigns *smaller* budgets to high-sensitivity clients, and includes the closed-loop hardening factor $\gamma(r_i)$. This is what HALP-FL actually uses.
+
+The two allocations optimize different objectives and are not approximations of one another. The code implements the deployed heuristic. The utility-optimal reference is provided as a comparison in the ablation experiment.
+
+The per-client, per-round budget is computed as:
+
+```python
+def compute_epsilon(i, t, epsilon, T, a, r_i, beta, s_i, h_i, p_t):
+    """
+    Compute the client-specific privacy budget with closed-loop hardening.
+
+    Matches Eq. (23)-(24) of the paper:
+
+        gamma(r_i)  = 1 - beta * r_i
+        w_tilde_t   = max( (t^a / sum(tau^a)) * (1 - s_i) * (1 - h_i) * p_t, 0.01 )
+        eps_i,t     = epsilon * gamma(r_i) * w_tilde_t / sum_tau(w_tilde_tau)
+    """
+    gamma      = 1.0 - beta * r_i
+    w_tilde    = max((t ** a) / sum(tau ** a for tau in range(1, T + 1))
+                     * (1 - s_i) * (1 - h_i) * p_t, 0.01)
+    normalizer = sum(w_tilde_at(i, tau) for tau in range(1, T + 1))
+    return epsilon * gamma * w_tilde / normalizer
+```
+
+Note that $\gamma(r_i)$ is the closed-loop factor driven by the running risk estimate $r_i \in [0, 1]$. The risk estimate is updated each round according to Eq. (25):
+
+```python
+def update_risk_estimate(r_i, z_t, eta, lambda_):
+    """
+    First-order low-pass filter on the anomaly signal (Eq. 25).
+
+        r_i <- (1 - eta) * r_i + eta * min(z_t / (2 * lambda), 1)
+    """
+    z_norm = min(z_t / (2.0 * lambda_), 1.0)
+    return (1.0 - eta) * r_i + eta * z_norm
+```
+
+### Threshold Paillier
+
+The threshold Paillier implementation follows the distributed key generation protocol of Fouque, Poupard, and Stern (2000), which is robust against up to $t - 1$ malicious participants during key generation. Decryption is non-interactive: each client produces a partial decryption independently and the server combines any $t$ valid partial decryptions. In our experiments with $N = 5$, $t = 3$, we observed fewer than 1% decryption failures per round due to client dropouts.
+
+### The verification layer
+
+The Bulletproof range proof and the Paillier ciphertext are linked by a cross-group linkage proof whose concrete sound construction is left to future work (Section 5.4.4.2 of the paper). The verification code in this repository implements the range-proof component and the ciphertext-side check **separately**; it does not implement the linkage proof, and therefore does not provide the integrity guarantee that a sound linkage proof would provide. The verification layer should be treated as a proof-of-concept design rather than a deployable cryptographic mechanism.
 
 ---
 
 ## Output
 
-### Generated Figures
+### Generated figures
 
-| File | Content | Purpose |
-|------|---------|---------|
-| `overall_comparison.png` | Accuracy & privacy-utility plots (2×3 grid) | Main performance comparison |
-| `communication_overhead.png` | Normalized communication costs | Scalability analysis |
-| `collusion_resistance.png` | Attack success rates over malicious clients | Adversarial robustness |
-| `gradient_leakage.png` | Image reconstruction comparisons (2×4 grid) | Privacy guarantee visualization |
-| `ablation_study.png` | Component accuracy & efficiency | Contribution analysis |
+| File | Content |
+|---|---|
+| `overall_comparison.png` | Accuracy at $\varepsilon = 1$ and $\varepsilon = 3$ across all methods |
+| `privacy_utility_tradeoff.png` | Accuracy vs. $\varepsilon$ on CIFAR-10 |
+| `communication_overhead.png` | Normalized communication per round |
+| `collusion_resistance.png` | Attack success rate vs. number of malicious clients |
+| `gradient_leakage.png` | Reconstruction quality under different privacy settings |
+| `ablation_study.png` | Component contributions on CIFAR-10 |
 
-
-### Result Files
+### Result files
 
 Results are saved in JSON format with the following structure:
 
 ```json
 {
   "experiment": "accuracy_comparison",
-  "timestamp": "2026-05-13",
+  "timestamp": "2025-09-25T14:32:11Z",
+  "mode": "full",
   "results": {
     "mnist": {
       "halp": [accuracy_values],
@@ -144,128 +260,106 @@ Results are saved in JSON format with the following structure:
     "fashion": {...},
     "cifar10": {...}
   },
-  "hyperparameters": {...}
+  "hyperparameters": {
+    "n_clients": 5,
+    "n_rounds": 30,
+    "local_epochs": {"mnist": 10, "fashion": 20, "cifar10": 20},
+    "learning_rate": 0.001,
+    "adjustment_a": 0.8,
+    "hardening_beta": 0.5,
+    "smoothing_eta": 0.3,
+    "anomaly_lambda": 3,
+    "threshold_t": 3,
+    "epsilon": 1
+  }
 }
 ```
 
----
-
-## Configuration
-
-Key hyperparameters can be modified in `halp_fl.py`:
-
-```python
-# Federated Learning Settings
-n_clients = 5              # Number of participating clients
-n_rounds = 30              # Communication rounds
-local_epochs = 5           # Local training epochs per round
-batch_size = 64            # Batch size for training
-learning_rate = 0.01       # SGD learning rate
-
-# Privacy and Security Settings
-adjustment_factor_a = 0.8  # Round adaptivity factor (Equation 5)
-threshold_t = 3            # Threshold for collusion resistance (t-of-n)
-```
-
-To customize experiments, edit the parameter values in `generate_all_figures()` function.
+The `mode` field is either `"full"` (paper-reproducing) or `"preview"` (illustrative only). Only `"full"` mode results should be compared against the paper.
 
 ---
 
-## Reproducing Results
-### To reproduce the reported results:
+## Reproducing the paper's results
 
-1. Run the code as-is:
+To reproduce the numbers reported in the paper:
 
 ```bash
-python halp_fl.py
+python halp_fl.py --full
 ```
 
-**Expected Accuracies** (simulated):
-- MNIST: **99.69%**
-- FashionMNIST: **93.47%**
-- CIFAR-10: **76.17%**
+This runs the complete training pipeline with the paper's hyperparameters and writes results to `results/` and figures to `figures/`.
 
-### To run full end-to-end training:
+**Expected results at $\varepsilon = 1$ (DP-protected subset):**
 
-⚠️ **Note**: Full training is computationally intensive (30 rounds × 5 clients × 5 epochs each).
+| Dataset | HALP-FL | ADPHE-FL (reimpl.) |
+|---|---|---|
+| MNIST | 99.69% | 96.00% |
+| FashionMNIST | 93.47% | 88.00% |
+| CIFAR-10 | 76.17% | 74.00% |
 
-1. In `halp_fl.py`, uncomment the actual training loops
-2. Comment out the simulated accuracy values
-3. Execute: `python halp_fl.py`
+**Expected results at $\varepsilon = 3$ (DP-protected subset):**
 
----
+| Dataset | HALP-FL | ADPHE-FL (reimpl.) | CLFLDP | DP-FL |
+|---|---|---|---|---|
+| MNIST | 99.71% | 96.80% | 95.00% | 90.00% |
+| FashionMNIST | 93.89% | 89.10% | 81.00% | 80.00% |
+| CIFAR-10 | 77.03% | 75.20% | 72.00% | 56.00% |
 
-## Code Architecture
+Results are means of five independent runs with different random seeds. Standard deviations on accuracy metrics are below 2% across runs.
 
-### Core Classes
-
-```python
-HALPFLClient              # Client with sensitivity tracking, KL-divergence, and progress metrics
-MNIST_CNN                 # CNN architecture for MNIST/FashionMNIST
-CIFAR_CNN                 # CNN architecture for CIFAR-10
-```
-
-### Core Functions
-
-```python
-train_client()                    # Local training with DP noise and HE simulation
-federated_averaging()             # Server-side parameter aggregation
-compute_epsilon()                 # Privacy budget computation: ε_i,t = ε·(t^a/Σ)·(1-s_i)·(1-h_i)·p_t
-
-# Experiment Orchestration
-run_accuracy_comparison()         # Experiment 1
-run_privacy_utility_experiment()  # Experiment 2
-measure_encryption_efficiency()   # Experiment 3
-measure_communication_overhead()  # Experiment 4
-simulate_collusion_attacks()      # Experiment 5
-simulate_gradient_leakage()       # Experiment 6
-run_ablation_study()              # Experiment 7
-
-# Output Management
-save_results_to_json()            # Persist results
-generate_tables()                 # LaTeX table generation
-generate_all_figures()            # Main orchestrator
-```
+**Reproducibility note.** The re-implemented ADPHE-FL baseline follows the unified protocol described in Section 6.2 of the paper: identical hardware, model architectures, data partitioning (Dirichlet $\alpha = 0.5$), five-seed repetition, a common Bernoulli(0.5) DP/HE split, and a common mean-$k$ clipping and top-$k$ sparsification pipeline. The two methods differ only in how they allocate the DP budget across clients and rounds — which is precisely the effect the comparison is designed to isolate.
 
 ---
 
 ## Troubleshooting
 
 | Issue | Solution |
-|-------|----------|
+|---|---|
 | `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
-| CUDA out of memory | Set `device='cpu'` in `generate_all_figures()` |
-| Dataset download failure | Check internet connection; manually download from [PyTorch Vision](https://pytorch.org/vision/) |
-| Figures not displaying | Use `plt.savefig()` instead of `plt.show()` on headless servers |
-| Slow execution | Enable GPU acceleration or reduce `n_rounds`, `n_clients` |
+| CUDA out of memory | Set `device = 'cpu'` in `halp_fl.py`, or reduce `batch_size` |
+| Dataset download failure | Check internet connection; manually download from [PyTorch Vision](https://pytorch.org/vision/stable/datasets.html) and place in `data/` |
+| Figures not displaying on a headless server | Add `import matplotlib; matplotlib.use('Agg')` at the top of `halp_fl.py`; figures will be saved as PNG files |
+| Slow execution | Full mode is CPU/GPU intensive; use `--preview` for a quick smoke test |
+| Threshold decryption fails | Ensure at least `t` clients are online and reachable in the same round |
 
-### Running on Headless Servers
-
-For systems without a display:
+### Running on headless servers
 
 ```python
-# Comment out all plt.show() calls in halp_fl.py
-# Figures will be saved automatically as PNG/PDF files
 import matplotlib
-matplotlib.use('Agg')  # Add at the beginning of halp_fl.py
+matplotlib.use('Agg')
 ```
+
+Place this at the top of `halp_fl.py`, and comment out any `plt.show()` calls. Figures are saved automatically as PNG files in `figures/`.
+
 ---
 
-## Contact & Support
-- Takudzwa Choto (ctakudzwa95@gmail.com)
+## Security and scope
 
+The framework provides three distinct guarantees. They should not be conflated:
+
+1. **Differential privacy for $\mathcal{W}_{\mathrm{DP}}$**: the DP-protected parameter subset satisfies $(\varepsilon, \delta)$-DP with $\varepsilon$ the cumulative budget over $T$ rounds. This guarantee is what the paper's accuracy claims refer to.
+2. **Cryptographic confidentiality for $\mathcal{W}_{\mathrm{HE}}$**: below the threshold $t$, the ciphertext is computationally hidden. At or above the threshold, the HE-protected aggregate is revealed exactly and carries no DP noise.
+3. **Sub-threshold collusion resistance**: the framework resists up to $t - 1$ colluding clients. The residual-privacy law when the threshold is broken is derived in Theorem 6 of the paper and reported empirically in Table 8.
+
+The following attacks are out of scope and are not evaluated: norm-constrained adaptive poisoning that deliberately stays below the detection threshold; backdoor and model-replacement attacks; gradient inversion with white-box knowledge of the server's aggregation; and clients misreporting their sensitivity score $s_i$ or non-IID degree $h_i$ to obtain a larger budget.
+
+---
 ## License
 
-This code is provided for research and reproducibility purposes. Please contact the authors for usage permissions and licensing inquiries.
+This code is released under the MIT License. See `LICENSE` for details.
+
+The threshold Paillier implementation is built on top of `python-paillier` (MIT License). The Bulletproof verification uses a Rust implementation with Python bindings; see `requirements.txt` and the acknowledgments section of the paper for details.
 
 ---
-
 ## Reproducibility Checklist
-- ✅ Complete source code provided
-- ✅ Dependencies explicitly listed in `requirements.txt`
-- ✅ Dataset download included
-- Set `torch.manual_seed(42)` for bit-exact reproducibility
-
+-  Complete source code provided in `halp_fl.py`
+-  All dependencies explicitly listed in `requirements.txt`
+-  Automatic dataset download for MNIST, FashionMNIST, CIFAR-10
+-  Fixed random seed (`torch.manual_seed(42)`, `numpy.random.seed(42)`) set at the start of `halp_fl.py` for bit-exact reproducibility
+-  Preview mode (`--preview`) for fast pipeline verification without full training
+-  Full mode (`--full`) reproduces the paper's reported numbers at the paper's hyperparameters
+-  JSON result files include the full hyperparameter set for auditing
+-  Figures regenerated from raw result files, not hard-coded
 ---
 
-**Last Updated:** May 13, 2026
+**Last Updated:** September 25, 2026
